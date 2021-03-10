@@ -53,14 +53,17 @@ def bilinear(img):
 
 
 if __name__ == "__main__":
-    #img_read = cv2.imread("/Users/Jacky Chen/Downloads/kobe.jpg")
-    #out = flip(img_read)
-    #img_read = cv2.imread("/Users/Jacky Chen/Downloads/curry.jpg")
-    #out = rotate(img_read)
-    #cv2.imwrite('/Users/Jacky Chen/Pictures/rotate.jpg',out)
-    img_read = cv2.imread("/Users/Jacky Chen/Downloads/IU.png")
-    out = bilinear(img_read)
-    cv2.imwrite('/Users/Jacky Chen/Pictures/bilinear.jpg',out)
-    cv2.imshow("sdf", out)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    kobe_img = cv2.imread("lab1/kobe.jpg")
+    IU_img = cv2.imread("lab1/IU.png")
+    curry_img = cv2.imread("lab1/curry.jpg")
+    out = flip(kobe_img)    
+    cv2.imwrite('lab1/flip.png',out)    
+    out = rotate(curry_img)
+    cv2.imwrite('lab1/rotate.png',out)    
+    out = bilinear(IU_img)
+    cv2.imwrite('lab1/bilinear.png',out)
+    out = nearest(IU_img)
+    cv2.imwrite('lab1/nearest.png', out)
+    
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
