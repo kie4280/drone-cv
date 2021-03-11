@@ -32,35 +32,7 @@ def histogram(img):
     img = np.reshape(img, shape)
     return img
 
-def threshold(img):
-    shape = np.shape(img)
-    stat = statistics(img)
-    
-    t = 0
-    var = 0
-    nb = 0
-    no = shape[0] * shape[1]
-    ub = 0
-    uo = 0
-    for i in range(256):
-        nb = nb + stat[i]
-        no = no - stat[i]
-        ub = (ub * nb + i * stat[i])/nb
-        uo = (ub * nb + i * stat[i])/nb
-        if nb*no*((ub-uo)**2) > var:
-            t = i
-
-    img = np.reshape(img, shape[0] * shape[1])
-    for i in range(shape[0]*shape[1]):
-        if(img[i]>t):
-            img[i]=255
-        else:
-            img[i]=0
-    img = np.reshape(img, shape)
-    return img
-    
-        
-        
+ 
 
 def threshold_2(img):
     stat = statistics(img)
