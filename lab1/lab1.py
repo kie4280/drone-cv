@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 def rotate(img):
-    height = img.shape[1]
+    height = img.shape[1] 
     width = img.shape[0]
     buf = np.zeros((height, width, img.shape[2]), dtype=np.uint8)
     for i in range(height):
