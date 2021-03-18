@@ -105,7 +105,9 @@ if __name__ == "__main__":
                 frame, array[0], array[1], array[2], array[3], )
         buf = np.zeros(frame.shape, dtype=np.uint8)
         buf[:, :, 2] = connected*30
+        fore = getFore(frame)
 
         cv2.imshow("frame", buf)
+        cv2.imshow("fore", fore)
         cv2.waitKey(33)
     cv2.destroyAllWindows()
