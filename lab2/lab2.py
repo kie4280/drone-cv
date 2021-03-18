@@ -72,26 +72,27 @@ def threshold_3(img):
     stat = statistics(img)
     for i in range(256):
         stat[i] = stat[i-1] + stat[i]
-    mu_b = 0; mu_o = 0
+    mu_b = 0; mu_o = 0; T_ = 0
     max_between = 0
-    fg = np.where(img >= 0, img, 0)
+    fg = np.where(img >= 1, img, 0)
     mu_b = np.sum(fg) / np.count_nonzero(fg)  
-    bg = np.where(img < 0, img, 0)
+    bg = np.where(img == 0, img, 0)
     mu_o = np.sum(bg) / np.count_nonzero(bg)
     for T in range(1, 256):
         n_b = stat[T-1]
         n_o = stat[T] - n_b
-        max_temp = n_b * n_o
-        max_between = max(max_between)
-        
+        max_temp = n_b * n_o *(mu_b-mu_o)**2
+        if max_temp > max_between:
+            max_between = max_temp  
+            T_ = T      
                
-
+    return np.where(img > T_, 255, 0)
 if __name__ == "__main__":
     MJ_img = cv2.imread("lab2/mj.tif")[:,:,0]
     
     input_img = cv2.imread("lab2/input.jpg")[:,:,0]
     out_img = histogram(MJ_img)
-    after_otsu= threshold_2(input_img)
+    after_otsu= threshold_3(input_img)
     cv2.imshow("ddd",after_otsu)
     cv2.imshow("sdf", out_img)
     cv2.waitKey(0)
