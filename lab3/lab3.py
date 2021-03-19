@@ -1,14 +1,12 @@
 from typing import Counter
 import cv2
 import numpy as np
-from numpy.core.defchararray import index
 
 # connect -2 means conflict
 
-
 def getConnected(frame):
     mask = getFore(frame)
-    connect = np.zeros((frame.shape[0], frame.shape[1]), dtype=np.int)
+    connect = np.zeros((frame.shape[0], frame.shape[1]), dtype=int)
     cat_counter: int = 0
     area_counter: dict = dict()
     index_mapping: dict = dict()
@@ -29,7 +27,7 @@ def getConnected(frame):
         elif left != 0 and top != 0:
             if left != top:
                 connect[cur_pos] = min(left, top)
-                index_mapping[max(left, top)] = min(left, top)
+                index_mapping[max(left, top)] = index_mapping[min(left, top)]
             else:
                 connect[cur_pos] = left
                 area_counter[left] = area_counter[left] + 1
@@ -73,10 +71,10 @@ def getBound(connect):
             continue
         x = int(x)
         if x not in bounds.keys():
-            bounds[x] = [1000, 1000, 0, 0]
+            bounds[x] = [10000, 10000, 0, 0]
         else:
-            bounds[x] = [min(bounds[x][0], it.multi_index[0]), min(bounds[x][1], it.multi_index[1]), max(
-                bounds[x][2], it.multi_index[0]), max(bounds[x][3], it.multi_index[1])]
+            bounds[x] = [min(bounds[x][0], it.multi_index[1]), min(bounds[x][1], it.multi_index[0]), max(
+                bounds[x][2], it.multi_index[1]), max(bounds[x][3], it.multi_index[0])]
     return bounds
 
 
@@ -97,17 +95,18 @@ if __name__ == "__main__":
             break
         
         connected = getConnected(frame)
-
+        fore = getFore(frame)
         ff = getBound(connected)
         for i in ff:
             array = ff[i]
             frame = cv2.rectangle(
-                frame, array[0], array[1], array[2], array[3], )
+                frame, (array[0], array[1]), (array[2], array[3]), color=(255,0,0), thickness=1)
         buf = np.zeros(frame.shape, dtype=np.uint8)
         buf[:, :, 2] = connected*30
-        fore = getFore(frame)
+        
 
-        cv2.imshow("frame", buf)
+        cv2.imshow("frame", frame)
+        cv2.imshow("mask", buf)
         cv2.imshow("fore", fore)
         cv2.waitKey(33)
     cv2.destroyAllWindows()
