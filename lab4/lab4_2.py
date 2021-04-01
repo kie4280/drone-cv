@@ -36,10 +36,11 @@ def project(image, video,transform):
 
 
 if __name__ == "__main__":
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     img = cv2.imread('warp.jpg',cv2.IMREAD_COLOR)
     img_height, img_width= np.shape(img)[0], np.shape(img)[1]
     dst = np.float32([p1, p2, p3, p4])  
+    transform = None
     while cap.isOpened():
         ret, frame = cap.read()
         if ret == False:
@@ -47,22 +48,17 @@ if __name__ == "__main__":
         cv2.imshow("actual", frame)
         src_height,src_width = np.shape(frame)[0] , np.shape(frame)[1]
         src = np.float32([(0,0),  (0,src_width-1), (src_height-1,0), (src_height-1, src_width-1)])
-        transform = cv2.getPerspectiveTransform(dst, src)
+        if transform is None:
+            transform = cv2.getPerspectiveTransform(dst, src)
         key = cv2.waitKey(1)
-        if key  == ord("q"):
-            print("capture")
-            result = project(img,frame,transform)
-        elif key == ord("b"):
+        
+        result = project(img,frame,transform)
+        if key == ord("b"):
             break
+        
+        cv2.imshow("org",result)
+        cv2.waitKey(1)
         #print(np.matmul(transform,(0,src_width-1,0)),'  ' ,np.matmul(transform,(src_height-1, src_width-1,1)))
         #print(transform)
-    cv2.namedWindow("org",0)
-    cv2.imshow("org",result)
-    # print(src)
-    # print(dst)
-    # transform = cv2.getPerspectiveTransform(dst, src)
-    # print(transform)
-    # print(np.matmul(transform,(241, 464,1))/np.matmul(transform,(241, 464,1))[2],'  ' ,np.matmul(transform,(765, 432,1))/np.matmul(transform,(761, 432,1))[2])
-    cv2.imwrite('/Users/Jacky Chen/Pictures/qqq.jpg',result)
-    cv2.waitKey(0)  
+
     cv2.destroyAllWindows()
