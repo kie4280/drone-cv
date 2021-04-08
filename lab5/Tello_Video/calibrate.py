@@ -31,6 +31,19 @@ class Calibrate:
         pass
 
     def write_calibrate_file(self, filename="1.xml"):
+        self.get_cali_results()
+        f = cv2.FileStorage(filename, cv2.FILE_STORAGE_WRITE)
+        f.write("instrinsic", self.mtx)
+        f.write("distortion", self.dist)
+        f.release()
+        return self.mtx, self.dist
+
+    def load_calibrate_file(self, filename="1.xml"):
+        f = cv2.FileStorage(filename, cv2.FILE_STORAGE_READ)
+        self.mtx = f.getNode("intrinsic").mat()
+        self.dist = f.getNode("distortion").mat()
+
+    def get_cali_results(self):
         if len(self.images) < 3:
             raise RuntimeError("Too small")
         for img in self.images:
@@ -65,12 +78,4 @@ class Calibrate:
         """
         ret, self.mtx, self.dist, rvecs, tvecs = cv2.calibrateCamera(
             self.objpoints, self.imgpoints, gray.shape[::-1], None, None)
-
-        f = cv2.FileStorage(filename, cv2.FILE_STORAGE_WRITE)
-        f.write("instrinsic", self.mtx)
-        f.write("distortion", self.dist)
-        f.release()
-
-    def get_cali_results(self):
         return self.mtx, self.dist
-

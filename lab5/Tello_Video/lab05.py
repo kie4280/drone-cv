@@ -21,10 +21,9 @@ def main():
             if key == ord('q'):
                 print("capture")
                 cal.add_image(frame)
-            elif key == ord('z'):
-                cal.write_calibrate_file()
+           
             elif key == ord('/'):
-                (intrinsic, distortion) = cal.get_cali_results()
+                (intrinsic, distortion) = cal.write_calibrate_file()
                 dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
                 # Initialize the detector parameters using default values
                 parameters = cv2.aruco.DetectorParameters_create()
