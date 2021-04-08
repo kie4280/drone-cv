@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: 目前檔案",
+            "name": "Python: current",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "${workspaceFolder}/lab6/Tello_Video/lab6.py",
             "console": "integratedTerminal"
         }
     ]
