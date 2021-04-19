@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import os
 import glob
-import tello
+from Tello_Video import tello
 
 
 class Calibrate:

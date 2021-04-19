@@ -8,7 +8,7 @@
             "name": "Python: current",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/lab6/Tello_Video/lab6.py",
+            "program": "${workspaceFolder}/lab7.py",
             "console": "integratedTerminal"
         }
     ]
