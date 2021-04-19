@@ -202,6 +202,10 @@ class Tello:
 
         """
         return self.send_command('emergency')
+    
+    def hover(self):
+
+        return self.send_command('stop')
 
     def set_speed(self, speed):
         """

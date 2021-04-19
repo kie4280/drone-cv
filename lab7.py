@@ -9,9 +9,9 @@ import math
 cal = calibrate.Calibrate()
 (intrinsic, distortion) = cal.load_calibrate_file("drone.xml")
 k0 = 100
-Threshold_x = 0.002
-Threshold_y = 0.005
-Threshold_z = 0.01
+Threshold_x = 0.02
+Threshold_y = 0.02
+Threshold_z = 0.02
 Threshold_rotate = 2
 
 dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
@@ -26,19 +26,31 @@ def follow(drone, ids: map):
     (x, y, z) = ids[0]["tvec"]/k0
     if x < -Threshold_x:
         drone.move_left(-x)
+    else:
+        drone.move_left(20)
     if x > Threshold_x:
         drone.move_right(x)
+    else:
+        drone.move_right(20)
     if y < -Threshold_y:
         drone.move_up(-y)
+    else:
+        drone.move_up(20)
     if y > Threshold_y:
         drone.move_down(y)
+    else:
+        drone.move_down(20)
     z = (z-1)/1.1
     #print("aaaaa",x,y,z)
     if z > Threshold_z:
         drone.move_forward(z)
+    else:
+        drone.move_forward(20)
         # print(str(z)+' forward ')
     if z < -Threshold_z:
         drone.move_backward(-z)
+    else:
+        drone.move_backward(20)
         # print(str(-z)+' backward ')
     rvec_matrix = cv2.Rodrigues(ids[0]["rvec"])
     proj_z = np.matmul(rvec_matrix[0], np.array([0, 0, 1]).T)
@@ -168,11 +180,14 @@ def detect_code(frame):
     ids = {}
 
     for i in range(len(markerIds)):
+        try:
 
-        rvec, tvec, _objPoints = cv2.aruco.estimatePoseSingleMarkers(markerCorners[i],
-                                                                     15, intrinsic, distortion)
-        ids[int(markerIds[i])] = {"tvec": tvec[0][0], "rvec": rvec[0][0]}
-        #print(markerIds[i], tvec)
+            rvec, tvec, _objPoints = cv2.aruco.estimatePoseSingleMarkers(markerCorners[i],
+                                                                        15, intrinsic, distortion)
+            ids[int(markerIds[i])] = {"tvec": tvec[0][0], "rvec": rvec[0][0]}
+            #print(markerIds[i], tvec)
+        except AssertionError as ae:
+            return frame, []
 
     return frame, ids
 
