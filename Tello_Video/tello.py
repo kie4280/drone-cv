@@ -149,7 +149,7 @@ class Tello:
 
         """
 
-        print (">> send cmd: {}".format(command))
+        # print (">> send cmd: {}".format(command))
         self.abort_flag = False
         timer = threading.Timer(self.command_timeout, self.set_abort_flag)
 
@@ -193,14 +193,24 @@ class Tello:
 
         return self.send_command('takeoff')
 
+    def emergency(self):
+        """
+        Initiates emergency landing.
+
+        Returns:
+            str: Response from Tello, 'OK' or 'FALSE'.
+
+        """
+        return self.send_command('emergency')
+
     def set_speed(self, speed):
         """
         Sets speed.
 
-        This method expects KPH or MPH. The Tello API expects speeds from
+        This method expects speeds from
         1 to 100 centimeters/second.
 
-        Metric: .1 to 3.6 KPH
+        Metric: 10 to 100 cm/s
         Imperial: .1 to 2.2 MPH
 
         Args:
@@ -214,9 +224,8 @@ class Tello:
         speed = float(speed)
 
         if self.imperial is True:
-            speed = int(round(speed * 44.704))
-        else:
-            speed = int(round(speed * 27.7778))
+            speed = int(round(speed * 30))
+                   
 
         return self.send_command('speed %s' % speed)
 
@@ -338,9 +347,7 @@ class Tello:
             speed = float(speed)
 
             if self.imperial is True:
-                speed = round((speed / 44.704), 1)
-            else:
-                speed = round((speed / 27.7778), 1)
+                speed = round((speed / 30), 1)
         except:
             pass
 
@@ -474,6 +481,8 @@ class Tello:
             self.takeoff()
         if key == ord('2'):
             self.land()
+        if key == ord('3'):
+            self.emergency()
         if key == ord('i'):
             self.move_forward(distance)
             print("forward!!!!")

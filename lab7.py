@@ -184,6 +184,8 @@ def main():
     checkpoint_1:bool = False
     checkpoint_2:bool = False
     checkpoint_3:bool = False
+
+    drone.set_speed(10)
     while (True):
         key = cv2.waitKey(1)
         drone.keyboard(key)
