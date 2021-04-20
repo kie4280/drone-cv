@@ -211,12 +211,6 @@ class Tello:
         """
 
         return self.send_command('stop')
-        
-    def go(self, x=0, y=0, z=0, speed=20):
-        """
-        go to x y z with speed
-        """
-        return self.send_command('go {} {} {} {}'.format(int(x), int(y), int(z), speed))
 
     def set_speed(self, speed):
         """
@@ -489,7 +483,7 @@ class Tello:
 
         return self.move('up', distance)
     def keyboard(self, key):
-        print("key:", key)
+        # print("key:", key)
         distance = 0.9
         degree = 30
         if key == ord('1'):

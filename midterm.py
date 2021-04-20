@@ -21,7 +21,7 @@ def center(drone, pos_in, rot_in, threshold_xyz=(10, 10, 10),
     x = x - offset_xy[0]
     y = y - offset_xy[1]
     z = z - offset_z
-    
+
     if abs(x) < threshold_xyz[0]:
         x = 0
     elif abs(x) < 20:
@@ -34,25 +34,24 @@ def center(drone, pos_in, rot_in, threshold_xyz=(10, 10, 10),
         z = 0
     elif abs(z) < 20:
         z = 20 if z > 0 else -20
-    speed = 10 if abs(x) > 0 or abs(y) >0 or abs(z) > 0 else 20
+    speed = 10 if abs(x) > 0 or abs(y) > 0 or abs(z) > 0 else 20
     drone.set_speed(speed)
     if x == 0 and y == 0 and z == 0:
         drone.hover()
     else:
-        if x<0 :
+        if x < 0:
             drone.move_left(-x)
-        else :
+        else:
             drone.move_right(x)
-        if y<0 :
+        if y < 0:
             drone.move_up(-y)
-        else :
+        else:
             drone.move_down(y)
 
-        if z<0 :
+        if z < 0:
             drone.move_backward(-z)
-        else :
+        else:
             drone.move_forward(z)
-        
 
     rvec_matrix = cv2.Rodrigues(rot_in)
     proj_z = np.matmul(rvec_matrix[0], np.array([0, 0, 1]).T)
@@ -70,16 +69,16 @@ def center(drone, pos_in, rot_in, threshold_xyz=(10, 10, 10),
 def follow(drone, ids: map):
     if 0 not in ids:
         return
-    center(drone, ids[0]["tvec"], ids[0]["rvec"],offset_z=80)
+    center(drone, ids[0]["tvec"], ids[0]["rvec"], offset_z=80)
 
 
 def position_1(drone, ids: map):
     if 3 not in ids or 0 in ids:
         return False
     (x, y, z) = ids[3]["tvec"]
-    print(x,y,z)
-    center(drone, ids[3]["tvec"], ids[3]["rvec"],offset_z=60)
-    if abs(x) < 10 and abs(y) < 10 and abs(z) <70:
+    print(x, y, z)
+    center(drone, ids[3]["tvec"], ids[3]["rvec"], offset_z=60)
+    if abs(x) < 10 and abs(y) < 10 and abs(z) < 70:
         return True
     else:
         return False
@@ -99,13 +98,12 @@ def position_2(drone, ids: map):
         print('aaaaa')
         return False
     (x, y, z) = ids[4]["tvec"]
-    print(x,y,z)
+    print(x, y, z)
     center(drone, ids[4]["tvec"], ids[4]["rvec"], offset_z=60)
-    if abs(x) < 10 and abs(y) < 10 and z < 70:
+    if abs(x) < 12 and abs(y) < 12 and z < 70:
         return True
     else:
         return False
-
 
 
 def jump(drone):
@@ -121,8 +119,8 @@ def position_3(drone, ids: map):
     if 5 not in ids or (0 in ids or 3 in ids or 4 in ids):
         return False
     (x, y, z) = ids[5]["tvec"]
-    center(drone, ids[5]["tvec"], ids[5]["rvec"])
-    if x < 10 and y < 10 and z <20:
+    center(drone, ids[5]["tvec"], ids[5]["rvec"], threshold_xyz=(7,7,7))
+    if abs(x) < 10 and abs(y) < 10 and abs(z-90) < 10:
         return True
     else:
         return False
@@ -161,7 +159,7 @@ def main():
     checkpoint_2: bool = False
     checkpoint_3: bool = False
 
-    #drone.set_speed(20)
+    # drone.set_speed(20)
 
     while (True):
         try:
@@ -177,11 +175,11 @@ def main():
             for i in ids.keys():
                 frame = cv2.aruco.drawAxis(
                     frame, intrinsic, distortion, ids[i]["rvec"], ids[i]["tvec"], 2)
-                # frame = cv2.putText(frame, 'z'+str(ids[i]["tvec"][2]),
-                #                     (int(frame.shape[0]/2) + int(ids[i]["tvec"][0]),
-                #                      int(frame.shape[1]/2) + int(ids[i]["tvec"][1])),
-                #                     cv2.Font_HERSHEY_DUPLEX,
-                #                     1, (255, 0, 0), 1, cv2.LINE_AA)
+                frame = cv2.putText(frame, 'z'+str(ids[i]["tvec"][2]),
+                                    (int(frame.shape[0]/2) + int(ids[i]["tvec"][0]),
+                                     int(frame.shape[1]/2) + int(ids[i]["tvec"][1])),
+                                    cv2.FONT_HERSHEY_DUPLEX,
+                                    1, (255, 0, 0), 1, cv2.LINE_AA)
 
             cv2.imshow('drone', frame)
             cv2.waitKey(1)
@@ -205,7 +203,6 @@ def main():
             break
         except Exception as e:
             print(e)
-        
 
 
 if __name__ == "__main__":
