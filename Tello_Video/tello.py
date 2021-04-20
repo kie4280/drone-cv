@@ -204,8 +204,19 @@ class Tello:
         return self.send_command('emergency')
     
     def hover(self):
+        """
+        hover in mid air
+        works anytime
+
+        """
 
         return self.send_command('stop')
+        
+    def go(self, x=0, y=0, z=0, speed=20):
+        """
+        go to x y z with speed
+        """
+        return self.send_command('go {} {} {} {}'.format(int(x), int(y), int(z), speed))
 
     def set_speed(self, speed):
         """
@@ -390,7 +401,7 @@ class Tello:
         if self.imperial is True:
             distance = int(round(distance * 30.48))
         else:
-            distance = int(round(distance * 100))
+            distance = int(round(distance))
 
         return self.send_command('%s %s' % (direction, distance))
 
