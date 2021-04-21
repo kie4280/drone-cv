@@ -4,6 +4,7 @@ import time
 from Tello_Video import calibrate
 import numpy as np
 import math
+from HUD import HUD
 
 
 cal = calibrate.Calibrate()
@@ -13,6 +14,10 @@ dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
 # Initialize the detector parameters using default values
 parameters = cv2.aruco.DetectorParameters_create()
 # Detect the markers in the image
+
+
+hud = HUD()
+hud.addFields("battery", "cmd")
 
 
 def center(drone, pos_in, rot_in, threshold_xyz=(10, 10, 10),
@@ -119,7 +124,7 @@ def position_3(drone, ids: map):
     if 5 not in ids or (0 in ids or 3 in ids or 4 in ids):
         return False
     (x, y, z) = ids[5]["tvec"]
-    center(drone, ids[5]["tvec"], ids[5]["rvec"], threshold_xyz=(7,7,7))
+    center(drone, ids[5]["tvec"], ids[5]["rvec"], threshold_xyz=(7, 7, 7))
     if abs(x) < 10 and abs(y) < 10 and abs(z-90) < 10:
         return True
     else:
@@ -150,15 +155,24 @@ def detect_code(frame):
 
     return frame, ids
 
+bat_last = time.now()
+def show_battery(drone):
+    
+    if time.now() - bat_last > 5000:
+        bat_last = time.now()
+        bat:int = drone.get_battery()
+        hud.update("battery", bat)
+
 
 def main():
     drone = tello.Tello('', 8889)
     time.sleep(8)
-    # cap = cv2.VideoCapture(1)
-    checkpoint_1: bool = False
-    checkpoint_2: bool = False
-    checkpoint_3: bool = False
+    # cap = cv2.VideoCapture(0)
+    checkpoint_1: int = 0
+    checkpoint_2: int = 0
+    checkpoint_3: int = 0
 
+    counter = 0
     # drone.set_speed(20)
 
     while (True):
@@ -167,36 +181,31 @@ def main():
             drone.keyboard(key)
             frame = drone.read()
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-            cv2.imshow("drone", frame)
-
             frame, ids = detect_code(frame)
             if len(ids) == 0:
+                cv2.imshow("drone", frame)
+                cv2.waitKey(1)
                 continue
             for i in ids.keys():
                 frame = cv2.aruco.drawAxis(
                     frame, intrinsic, distortion, ids[i]["rvec"], ids[i]["tvec"], 2)
-                frame = cv2.putText(frame, 'z'+str(ids[i]["tvec"][2]),
-                                    (int(frame.shape[0]/2) + int(ids[i]["tvec"][0]),
-                                     int(frame.shape[1]/2) + int(ids[i]["tvec"][1])),
-                                    cv2.FONT_HERSHEY_DUPLEX,
-                                    1, (255, 0, 0), 1, cv2.LINE_AA)
 
             cv2.imshow('drone', frame)
             cv2.waitKey(1)
             follow(drone, ids)
-            if not checkpoint_1:
-                checkpoint_1 = position_1(drone, ids)
-                if checkpoint_1:
+            if checkpoint_1 < 10:
+                checkpoint_1 += int(position_1(drone, ids))
+                if checkpoint_1 > 9:
                     down(drone)
-            if not checkpoint_2:
-                checkpoint_2 = position_2(drone, ids)
-                if checkpoint_2:
+            if checkpoint_2 < 10:
+                checkpoint_2 += int(position_2(drone, ids))
+                if checkpoint_2 > 9:
                     jump(drone)
-            if not checkpoint_3:
-                checkpoint_3 = position_3(drone, ids)
-                if checkpoint_3:
+            if checkpoint_3 < 15:
+                checkpoint_3 += int(position_3(drone, ids))
+                if checkpoint_3 > 14:
                     drone.land()
-            print(checkpoint_1)
+
         except AssertionError as ae:
             print(ae)
         except KeyboardInterrupt:
