@@ -85,13 +85,11 @@ class Calibrate:
 
 
 def start_calibrate():
-    cap = cv2.VideoCapture(0)
+    drone = tello.Tello('', 8889)
 
     cal = Calibrate()
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if ret == False:
-            break
+    while True:
+        frame = drone.read()
         cv2.imshow("drone", frame)
         key = cv2.waitKey(1)
         if key == ord('q'):

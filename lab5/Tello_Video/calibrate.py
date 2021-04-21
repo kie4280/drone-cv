@@ -33,7 +33,7 @@ class Calibrate:
     def write_calibrate_file(self, filename="1.xml"):
         self.get_cali_results()
         f = cv2.FileStorage(filename, cv2.FILE_STORAGE_WRITE)
-        f.write("instrinsic", self.mtx)
+        f.write("intrinsic", self.mtx)
         f.write("distortion", self.dist)
         f.release()
         return self.mtx, self.dist

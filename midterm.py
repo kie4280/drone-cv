@@ -8,7 +8,7 @@ from HUD import HUD
 
 
 cal = calibrate.Calibrate()
-(intrinsic, distortion) = cal.load_calibrate_file("drone.xml")
+(intrinsic, distortion) = cal.load_calibrate_file("1.xml")
 
 dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
 # Initialize the detector parameters using default values
@@ -39,7 +39,7 @@ def center(drone, pos_in, rot_in, threshold_xyz=(10, 10, 10),
         z = 0
     elif abs(z) < 20:
         z = 20 if z > 0 else -20
-    speed = 10 if abs(x) > 0 or abs(y) > 0 or abs(z) > 0 else 20
+    speed = 10 if abs(x) == 0 or abs(y) == 0 or abs(z) == 0 else 30
     drone.set_speed(speed)
     if x == 0 and y == 0 and z == 0:
         drone.hover()
@@ -78,11 +78,11 @@ def follow(drone, ids: map):
 
 
 def position_1(drone, ids: map):
-    if 3 not in ids or 0 in ids:
+    if 2 not in ids or 0 in ids:
         return False
-    (x, y, z) = ids[3]["tvec"]
+    (x, y, z) = ids[2]["tvec"]
     print(x, y, z)
-    center(drone, ids[3]["tvec"], ids[3]["rvec"], offset_z=60)
+    center(drone, ids[2]["tvec"], ids[2]["rvec"], offset_z=60)
     if abs(x) < 10 and abs(y) < 10 and abs(z) < 70:
         return True
     else:
@@ -91,10 +91,12 @@ def position_1(drone, ids: map):
 
 def down(drone):
     print('down')
+    drone.move_down(20)
+    time.sleep(4)
     drone.move_down(50)
-    time.sleep(8)
+    time.sleep(4)
     drone.move_forward(120)
-    time.sleep(8)
+    time.sleep(4)
     drone.move_up(50)
 
 
@@ -113,6 +115,7 @@ def position_2(drone, ids: map):
 
 def jump(drone):
     print('jump')
+    time.sleep(4)
     drone.move_up(100)
     time.sleep(4)
     drone.move_forward(120)
@@ -185,14 +188,13 @@ def main():
             frame, ids = detect_code(frame)
             if len(ids) == 0:
                 cv2.imshow("drone", frame)
-                cv2.waitKey(1)
                 continue
             for i in ids.keys():
                 frame = cv2.aruco.drawAxis(
                     frame, intrinsic, distortion, ids[i]["rvec"], ids[i]["tvec"], 2)
 
             cv2.imshow('drone', frame)
-            cv2.waitKey(1)
+            #cv2.waitKey(1)
             follow(drone, ids)
             if checkpoint_1 < 10:
                 checkpoint_1 += int(position_1(drone, ids))
@@ -218,5 +220,5 @@ def main():
 if __name__ == "__main__":
     main()
     # Load the predefined dictionary
-    # calibrate.start_calibrate()
+    #calibrate.start_calibrate()
     cv2.destroyAllWindows()
