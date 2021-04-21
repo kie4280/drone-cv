@@ -155,11 +155,12 @@ def detect_code(frame):
 
     return frame, ids
 
-bat_last = time.now()
+bat_last = time.time()
 def show_battery(drone):
+    global bat_last
     
     if time.now() - bat_last > 5000:
-        bat_last = time.now()
+        bat_last = time.time()
         bat:int = drone.get_battery()
         hud.update("battery", bat)
 
