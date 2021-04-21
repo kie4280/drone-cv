@@ -169,7 +169,7 @@ def show_battery(drone):
 
 
 def main():
-    drone = tello.Tello('', 8889)
+    drone = tello.Tello('', 8889, command_timeout=0.08)
     time.sleep(8)
     # cap = cv2.VideoCapture(0)
     checkpoint_1: int = 0
