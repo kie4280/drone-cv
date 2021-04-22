@@ -97,7 +97,7 @@ def main(cmd, val):
             if request_data:
                 cmd_channel[0].recv()
                 value_channel[1].send((ids, key))
-            # ret, video_frame = cap.read()
+            ret, video_frame = cap.read()
             video_frame = cv2.cvtColor(video_frame, cv2.COLOR_RGB2BGR)
             video_frame, ids = detect_code(video_frame)
             if len(ids) == 0:
