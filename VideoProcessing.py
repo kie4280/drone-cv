@@ -5,7 +5,6 @@ import cv2
 import time
 from Tello_Video import calibrate
 import numpy as np
-import math
 from HUD import HUD
 import traceback
 

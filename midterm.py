@@ -137,7 +137,7 @@ cmd_channel = mp.Pipe()
 
 
 def drone_control():
-    drone = tello.Tello('', 8889)
+    drone = tello.Tello('', 8889, command_timeout=0.08)
 
     time.sleep(8)
     p = mp.Process(target=VideoProcessing.main,
@@ -157,19 +157,19 @@ def drone_control():
             if len(ids) == 0:
                 continue
             print(key, ids)
-            # follow(drone, ids)
-            # if checkpoint_1 < 10:
-            #     checkpoint_1 += int(position_1(drone, ids))
-            #     if checkpoint_1 > 9:
-            #         down(drone)
-            # if checkpoint_2 < 10:
-            #     checkpoint_2 += int(position_2(drone, ids))
-            #     if checkpoint_2 > 9:
-            #         jump(drone)
-            # if checkpoint_3 < 15:
-            #     checkpoint_3 += int(position_3(drone, ids))
-            #     if checkpoint_3 > 14:
-            #         drone.land()
+            follow(drone, ids)
+            if checkpoint_1 < 10:
+                checkpoint_1 += int(position_1(drone, ids))
+                if checkpoint_1 > 9:
+                    down(drone)
+            if checkpoint_2 < 10:
+                checkpoint_2 += int(position_2(drone, ids))
+                if checkpoint_2 > 9:
+                    jump(drone)
+            if checkpoint_3 < 15:
+                checkpoint_3 += int(position_3(drone, ids))
+                if checkpoint_3 > 14:
+                    drone.land()
 
         except AssertionError as ae:
             traceback.print_exc()

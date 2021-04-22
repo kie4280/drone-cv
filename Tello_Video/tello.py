@@ -3,7 +3,6 @@ import threading
 import time
 import numpy as np
 import cv2
-import multiprocessing
 
 
 # import libh264decoder
@@ -55,8 +54,8 @@ class Tello:
         # self.socket_video.bind((local_ip, self.local_video_port))
 
         # thread for receiving video
-        self.receive_video_thread = multiprocessing.Process(target=self._receive_video_thread)
-        self.receive_video_thread.daemon = True
+        # self.receive_video_thread = multiprocessing.Process(target=self._receive_video_thread)
+        # self.receive_video_thread.daemon = True
 
         # self.receive_video_thread.start()
 
