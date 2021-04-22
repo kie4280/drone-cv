@@ -76,7 +76,7 @@ def main(_cmd, _val):
     vt.daemon = True
     vt.start()
 
-    cap = cv2.VideoCapture(0)
+    # cap = cv2.VideoCapture(0)
     # drone.set_speed(20)
     while (True):
 
@@ -91,7 +91,7 @@ def main(_cmd, _val):
                     for i in data.keys():
                         hud.update(i, data[i])
                     value_channel[1].send(0)
-            ret, video_frame = cap.read()
+            # ret, video_frame = cap.read()
             video_frame = cv2.cvtColor(video_frame, cv2.COLOR_RGB2BGR)
             video_frame, ids = detect_code(video_frame)
             video_frame = hud.getFrame(video_frame)

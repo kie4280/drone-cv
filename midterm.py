@@ -76,6 +76,28 @@ def center(drone, pos_in, rot_in, threshold_xyz=(10, 10, 10),
             drone.move_forward(z)
         return
     else:
+        # drone.set_speed(20)
+
+        # if y < 0:
+        #     drone.move_up(-y)
+        #     return
+        # elif y > 0:
+        #     drone.move_down(y)
+        # return
+        # elif abs(x) > 20:
+        #     drone.set_speed(speed_x)
+        #     if x < 0:
+        #         drone.move_left(-x)
+        #     elif x > 0:
+        #         drone.move_right(x)
+        #     return
+        # elif abs(z) > 20:
+        #     drone.set_speed(speed_z)
+        #     if z < 0:
+        #         drone.move_backward(-z)
+        #     elif z > 0:
+        #         drone.move_forward(z)
+        #     return 
         
         drone.hover()
     
