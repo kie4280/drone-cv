@@ -15,11 +15,11 @@ max_speed = 50
 slight_adjust:bool = False
 
 def center(drone, pos_in, rot_in, threshold_xyz=(10, 10, 10),
-           offset_z=100, offset_xy=(0, 0), threshold_rot=5):
+           offset_z=100, offset_xy=(0, 0), threshold_rot=10):
     x, y, z = pos_in
     x = x - offset_xy[0]
     y = y - offset_xy[1]
-    z = z - offset_z
+    z = (z - offset_z) / 1.2
 
     # rotate first
     rvec_matrix = cv2.Rodrigues(rot_in)
@@ -51,31 +51,33 @@ def center(drone, pos_in, rot_in, threshold_xyz=(10, 10, 10),
         z = 0
     elif abs(z) < 20:
         z = 20 if z > 0 else -20
+    
+    # drone.go(-x, y, z, 40)
     speed_y = min(max(abs(y), max_speed), min_speed)
     speed_x = min(max(abs(x), max_speed), min_speed)
     speed_z = min(max(abs(z), max_speed), min_speed)
     if abs(y) > 20:
-        drone.set_speed(speed_y)
+        # drone.set_speed(speed_y)
         if y < 0:
             drone.move_up(-y)
         elif y > 0:
             drone.move_down(y)
         return
     elif abs(x) > 20:
-        drone.set_speed(speed_x)
+        # drone.set_speed(speed_x)
         if x < 0:
             drone.move_left(-x)
         elif x > 0:
             drone.move_right(x)
         return
     elif abs(z) > 20:
-        drone.set_speed(speed_z)
+        # drone.set_speed(speed_z)
         if z < 0:
             drone.move_backward(-z)
         elif z > 0:
             drone.move_forward(z)
         return
-    else:
+    # else:
         # drone.set_speed(20)
 
         # if y < 0:
@@ -99,14 +101,14 @@ def center(drone, pos_in, rot_in, threshold_xyz=(10, 10, 10),
         #         drone.move_forward(z)
         #     return 
         
-        drone.hover()
+       
     
 
 
 def follow(drone, ids: map):
     if 0 not in ids:
         return
-    center(drone, ids[0]["tvec"], ids[0]["rvec"], offset_z=80)
+    center(drone, ids[0]["tvec"], ids[0]["rvec"], offset_z=100, offset_xy=(0,0))
 
 
 def position_1(drone, ids: map):
@@ -123,10 +125,11 @@ def position_1(drone, ids: map):
 
 def down(drone):
     print('down')
+    time.sleep(7)
     drone.move_down(50)
-    time.sleep(8)
+    time.sleep(7)
     drone.move_forward(120)
-    time.sleep(8)
+    time.sleep(7)
     drone.move_up(50)
 
 
@@ -170,8 +173,8 @@ def show_battery(drone):
 
     if time.time() - bat_last > 5:
         bat_last = time.time()
-        # bat: int = drone.get_battery()
-        cmd_channel[1].send([2, {"battery": time.time()}])
+        bat: int = drone.get_battery()
+        cmd_channel[1].send([2, {"battery": bat}])
         value_channel[0].recv()
 
 
@@ -180,7 +183,7 @@ cmd_channel = mp.Pipe()
 
 
 def drone_control():
-    drone = tello.Tello('', 8889, command_timeout=0.1)
+    drone = tello.Tello('', 8889, command_timeout=0.3)
 
     time.sleep(8)
     p = mp.Process(target=VideoProcessing.main,
