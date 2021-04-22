@@ -7,6 +7,7 @@ import math
 from HUD import HUD
 import multiprocessing as mp
 import VideoProcessing
+import traceback
 
 
 def center(drone, pos_in, rot_in, threshold_xyz=(10, 10, 10),
@@ -171,10 +172,12 @@ def drone_control():
             #         drone.land()
 
         except AssertionError as ae:
+            traceback.print_exc()
             print(ae)
         except KeyboardInterrupt:
             break
         except Exception as e:
+            traceback.print_exc()
             print(e)
 
 

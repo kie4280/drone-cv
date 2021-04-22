@@ -7,7 +7,7 @@ from Tello_Video import calibrate
 import numpy as np
 import math
 from HUD import HUD
-import midterm
+import traceback
 
 
 cal = calibrate.Calibrate()
@@ -60,7 +60,7 @@ def show_battery(drone):
         hud.update("battery", bat)
 
 
-video_frame = np.zeros(shape=(720, 720, 3))
+video_frame = np.zeros(shape=(720, 720, 3), dtype=np.uint8)
 
 
 def _receive_video_thread():
@@ -97,7 +97,7 @@ def main(cmd, val):
             if request_data:
                 cmd_channel[0].recv()
                 value_channel[1].send((ids, key))
-            ret, video_frame = cap.read()
+            # ret, video_frame = cap.read()
             video_frame = cv2.cvtColor(video_frame, cv2.COLOR_RGB2BGR)
             video_frame, ids = detect_code(video_frame)
             if len(ids) == 0:
@@ -110,10 +110,12 @@ def main(cmd, val):
             cv2.imshow('drone', video_frame)
 
         except AssertionError as ae:
+            traceback.print_exc()
             print(ae)
         except KeyboardInterrupt:
             break
         except Exception as e:
+            traceback.print_exc()
             print(e)
 
 
