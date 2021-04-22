@@ -22,7 +22,7 @@ class HUD:
             frame = cv2.putText(frame, k + ": " + v,
                                 (0, i * 30+30),
                                 cv2.FONT_HERSHEY_DUPLEX,
-                                1, (255, 0, 0), 1, cv2.LINE_AA)
+                                1, (0, 0, 255), 1, cv2.LINE_AA)
         return frame
 
 

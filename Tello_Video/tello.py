@@ -235,9 +235,9 @@ class Tello:
         speed = float(speed)
 
         if self.imperial is True:
-            speed = int(round(speed * 30))
-                   
-
+            speed = speed * 30
+          
+        speed = int(round(speed))
         return self.send_command('speed %s' % speed)
 
     def rotate_cw(self, degrees):

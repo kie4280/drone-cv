@@ -9,6 +9,10 @@ import multiprocessing as mp
 import VideoProcessing
 import traceback
 
+min_speed = 20
+max_speed = 50
+
+slight_adjust:bool = False
 
 def center(drone, pos_in, rot_in, threshold_xyz=(10, 10, 10),
            offset_z=100, offset_xy=(0, 0), threshold_rot=5):
@@ -17,6 +21,24 @@ def center(drone, pos_in, rot_in, threshold_xyz=(10, 10, 10),
     y = y - offset_xy[1]
     z = z - offset_z
 
+    # rotate first
+    rvec_matrix = cv2.Rodrigues(rot_in)
+    proj_z = np.matmul(rvec_matrix[0], np.array([0, 0, 1]).T)
+    rad = math.atan2(proj_z[0], proj_z[2])
+    degree = np.rad2deg(rad)
+    degree = (degree-180) % 360
+    if degree > 180:
+        degree -= 360
+    if degree > threshold_rot:
+        drone.rotate_cw(degree)
+        drone.move_right(20)
+        return
+    if degree < -threshold_rot:
+        drone.rotate_ccw(-degree)
+        drone.move_left(20)
+        return
+
+    # move
     if abs(x) < threshold_xyz[0]:
         x = 0
     elif abs(x) < 20:
@@ -29,36 +51,34 @@ def center(drone, pos_in, rot_in, threshold_xyz=(10, 10, 10),
         z = 0
     elif abs(z) < 20:
         z = 20 if z > 0 else -20
-    speed = 10 if abs(x) > 0 or abs(y) > 0 or abs(z) > 0 else 20
-    drone.set_speed(speed)
-    if x == 0 and y == 0 and z == 0:
-        drone.hover()
-    else:
-        if x < 0:
-            drone.move_left(-x)
-        else:
-            drone.move_right(x)
+    speed_y = min(max(abs(y), max_speed), min_speed)
+    speed_x = min(max(abs(x), max_speed), min_speed)
+    speed_z = min(max(abs(z), max_speed), min_speed)
+    if abs(y) > 20:
+        drone.set_speed(speed_y)
         if y < 0:
             drone.move_up(-y)
-        else:
+        elif y > 0:
             drone.move_down(y)
-
+        return
+    elif abs(x) > 20:
+        drone.set_speed(speed_x)
+        if x < 0:
+            drone.move_left(-x)
+        elif x > 0:
+            drone.move_right(x)
+        return
+    elif abs(z) > 20:
+        drone.set_speed(speed_z)
         if z < 0:
             drone.move_backward(-z)
-        else:
+        elif z > 0:
             drone.move_forward(z)
-
-    rvec_matrix = cv2.Rodrigues(rot_in)
-    proj_z = np.matmul(rvec_matrix[0], np.array([0, 0, 1]).T)
-    rad = math.atan2(proj_z[0], proj_z[2])
-    degree = np.rad2deg(rad)
-    degree = (degree-180) % 360
-    if degree > 180:
-        degree -= 360
-    if degree > threshold_rot:
-        drone.rotate_cw(degree)
-    if degree < -threshold_rot:
-        drone.rotate_ccw(-degree)
+        return
+    else:
+        
+        drone.hover()
+    
 
 
 def follow(drone, ids: map):
@@ -126,10 +146,11 @@ bat_last = time.time()
 def show_battery(drone):
     global bat_last
 
-    if time.now() - bat_last > 5000:
+    if time.time() - bat_last > 5:
         bat_last = time.time()
-        bat: int = drone.get_battery()
-        hud.update("battery", bat)
+        # bat: int = drone.get_battery()
+        cmd_channel[1].send([2, {"battery": time.time()}])
+        value_channel[0].recv()
 
 
 value_channel = mp.Pipe()
@@ -137,7 +158,7 @@ cmd_channel = mp.Pipe()
 
 
 def drone_control():
-    drone = tello.Tello('', 8889, command_timeout=0.08)
+    drone = tello.Tello('', 8889, command_timeout=0.1)
 
     time.sleep(8)
     p = mp.Process(target=VideoProcessing.main,
@@ -150,7 +171,7 @@ def drone_control():
 
     while (True):
         try:
-            cmd_channel[1].send(1)
+            cmd_channel[1].send([1, None])
             ids, key = value_channel[0].recv()
             drone.keyboard(key)
 
@@ -158,18 +179,19 @@ def drone_control():
                 continue
             print(key, ids)
             follow(drone, ids)
-            if checkpoint_1 < 10:
+            if checkpoint_1 < 5:
                 checkpoint_1 += int(position_1(drone, ids))
-                if checkpoint_1 > 9:
+                if checkpoint_1 > 4:
                     down(drone)
-            if checkpoint_2 < 10:
+            if checkpoint_2 < 5:
                 checkpoint_2 += int(position_2(drone, ids))
-                if checkpoint_2 > 9:
+                if checkpoint_2 > 4:
                     jump(drone)
-            if checkpoint_3 < 15:
+            if checkpoint_3 < 10:
                 checkpoint_3 += int(position_3(drone, ids))
-                if checkpoint_3 > 14:
+                if checkpoint_3 > 9:
                     drone.land()
+            show_battery(drone)
 
         except AssertionError as ae:
             traceback.print_exc()

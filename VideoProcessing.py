@@ -10,7 +10,7 @@ import traceback
 
 
 cal = calibrate.Calibrate()
-(intrinsic, distortion) = cal.load_calibrate_file("drone.xml")
+(intrinsic, distortion) = cal.load_calibrate_file("1.xml")
 
 dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
 # Initialize the detector parameters using default values
@@ -49,16 +49,6 @@ def detect_code(frame):
 
 bat_last = time.time()
 
-
-def show_battery(drone):
-    global bat_last
-
-    if time.now() - bat_last > 5000:
-        bat_last = time.time()
-        bat: int = drone.get_battery()
-        hud.update("battery", bat)
-
-
 video_frame = np.zeros(shape=(720, 720, 3), dtype=np.uint8)
 
 
@@ -78,10 +68,10 @@ value_channel: mp.Pipe()
 cmd_channel: mp.Pipe()
 
 
-def main(cmd, val):
+def main(_cmd, _val):
     global video_frame, key, ids, cmd_channel, value_channel
-    cmd_channel = cmd
-    value_channel = val
+    cmd_channel = _cmd
+    value_channel = _val
     vt = threading.Thread(target=_receive_video_thread)
     vt.daemon = True
     vt.start()
@@ -94,11 +84,17 @@ def main(cmd, val):
             key = cv2.waitKey(1)
             request_data = cmd_channel[0].poll()
             if request_data:
-                cmd_channel[0].recv()
-                value_channel[1].send((ids, key))
+                cmd, data = cmd_channel[0].recv()
+                if cmd == 1:
+                    value_channel[1].send((ids, key))
+                elif cmd == 2:
+                    for i in data.keys():
+                        hud.update(i, data[i])
+                    value_channel[1].send(0)
             ret, video_frame = cap.read()
             video_frame = cv2.cvtColor(video_frame, cv2.COLOR_RGB2BGR)
             video_frame, ids = detect_code(video_frame)
+            video_frame = hud.getFrame(video_frame)
             if len(ids) == 0:
                 cv2.imshow("drone", video_frame)
                 continue
