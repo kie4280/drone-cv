@@ -3,6 +3,9 @@ import threading
 import time
 import numpy as np
 import cv2
+import multiprocessing
+
+
 # import libh264decoder
 
 class Tello:
@@ -31,7 +34,7 @@ class Tello:
         self.is_freeze = False  # freeze current camera output
         self.last_frame = None
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # socket for sending cmd
-        self.socket_video = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # socket for receiving video stream
+        # self.socket_video = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # socket for receiving video stream
         self.tello_address = (tello_ip, tello_port)
         self.local_video_port = 11111  # port for receiving video stream
         self.last_height = 0
@@ -52,16 +55,16 @@ class Tello:
         # self.socket_video.bind((local_ip, self.local_video_port))
 
         # thread for receiving video
-        self.receive_video_thread = threading.Thread(target=self._receive_video_thread)
+        self.receive_video_thread = multiprocessing.Process(target=self._receive_video_thread)
         self.receive_video_thread.daemon = True
 
-        self.receive_video_thread.start()
+        # self.receive_video_thread.start()
 
     def __del__(self):
         """Closes the local socket."""
 
         self.socket.close()
-        self.socket_video.close()
+        # self.socket_video.close()
     
     def read(self):
         """Return the last frame from camera."""
@@ -484,8 +487,8 @@ class Tello:
         return self.move('up', distance)
     def keyboard(self, key):
         # print("key:", key)
-        distance = 0.9
-        degree = 30
+        distance = 30
+        degree = 15
         if key == ord('1'):
             self.takeoff()
         if key == ord('2'):
