@@ -8,7 +8,7 @@
             "name": "Python: current",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/lab8/lab8.py",
+            "program": "${workspaceFolder}/lab10.py",
             "console": "integratedTerminal"
         }
     ]
