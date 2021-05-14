@@ -116,7 +116,7 @@ def blue_line_filter(frame):
 
 def main():
     drone = tello.Tello('', 8889)
-    time.sleep(15)
+    time.sleep(10)
     # cap = cv2.VideoCapture(0)
     cur_dir_LR = 0
     cur_dir_UD = 0
@@ -127,9 +127,11 @@ def main():
         # ret, frame = cap.read()
         # if ret == False:
         #     break
+        frame = drone.read()
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         key = cv2.waitKey(1)
         drone.keyboard(key)
-        frame = drone.read()
+        
         buf = np.zeros(frame.shape, dtype=np.uint8)
         mask = blue_line_filter(frame)
         buf[:, :, 1] = mask[:, :]
@@ -202,8 +204,8 @@ def main():
             frame = cv2.putText(frame, 'z'+str(ids[i]["tvec"][2]), (int(frame.shape[0]/2) + int(ids[i]["tvec"][0]), int(frame.shape[1]/2) + int(ids[i]["tvec"][1])), cv2.FONT_HERSHEY_SCRIPT_COMPLEX,
                                 1, (255, 0, 0), 1, cv2.LINE_AA)
 
-        if 4 in ids.keys():
-            checkpoint_1 = True
+        if 4 in ids.keys() and cur_dir_UD == -1:
+            drone.land()
         cv2.imshow('drone', frame)
         cv2.waitKey(1)
 

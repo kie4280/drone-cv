@@ -53,11 +53,11 @@ class Tello:
 
         # self.socket_video.bind((local_ip, self.local_video_port))
 
-        # thread for receiving video
-        # self.receive_video_thread = multiprocessing.Process(target=self._receive_video_thread)
-        # self.receive_video_thread.daemon = True
+       #  thread for receiving video
+        self.receive_video_thread = threading.Thread(target=self._receive_video_thread)
+        self.receive_video_thread.daemon = True
 
-        # self.receive_video_thread.start()
+        self.receive_video_thread.start()
 
     def __del__(self):
         """Closes the local socket."""
