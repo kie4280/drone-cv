@@ -2,8 +2,9 @@ import cv2
 import numpy as np
 import timeit
 import glob
+import time
 
-SURF_detector = cv2.xfeatures2d.SURF_create()
+SURF_detector = cv2.xfeatures2d.SURF_create(hessianThreshold=400)
 SIFT_detector = cv2.xfeatures2d.SIFT_create()
 ORB_detector = cv2.ORB_create()
 
@@ -72,30 +73,84 @@ def test_single(img1, img2, filename="test.jpg"):
     img2 = cv2.imread(img2)
     o1, kps1, f1 = detect_ORB(img1)
     o2, kps2, f2 = detect_ORB(img2)
-    o3 = match(o1, o2, kps1, kps2, f1, f2)
-    cv2.imwrite("ORB_" + filename, o3)
+    o3 = match(o1, o2, kps1, kps2, f1, f2, ratio=0.75)
+    cv2.imwrite("output/ORB_" + filename, o3)
     o1, kps1, f1 = detect_SIFT(img1)
     o2, kps2, f2 = detect_SIFT(img2)
-    o3 = match(o1, o2, kps1, kps2, f1, f2)
-    cv2.imwrite("SIFT_" + filename, o3)
+    o3 = match(o1, o2, kps1, kps2, f1, f2, ratio=0.75)
+    cv2.imwrite("output/SIFT_" + filename, o3)
     o1, kps1, f1 = detect_SURF(img1)
     o2, kps2, f2 = detect_SURF(img2)
-    o3 = match(o1, o2, kps1, kps2, f1, f2)
-    cv2.imwrite("SURF_" + filename, o3)
+    o3 = match(o1, o2, kps1, kps2, f1, f2, ratio=0.75)
+    cv2.imwrite("output/SURF_" + filename, o3)
 
 
 def test_time(img1, img2, filename="test.jpg"):
-    pass
+    res = dict()
+    secs = 0
+    img1 = cv2.imread(img1)
+    img2 = cv2.imread(img2)
+    for _ in range(5):
+        now = time.time()
+        o1, kps1, f1 = detect_ORB(img1)
+        o2, kps2, f2 = detect_ORB(img2)
+        secs += time.time() - now
+    res["orb"] = secs / 10
+    secs = 0
+    for _ in range(10):
+        now = time.time()
+        o3 = match(o1, o2, kps1, kps2, f1, f2, ratio=0.75)
+        secs += time.time() - now
+    res["match_orb"] = secs / 10
+    secs = 0
+# -----------------------------------------
+    for _ in range(5):
+        now = time.time()
+        o1, kps1, f1 = detect_SIFT(img1)
+        o2, kps2, f2 = detect_SIFT(img2)
+        secs += time.time() - now
+    res["sift"] = secs / 10
+    secs = 0
+    
+    for _ in range(10):
+        now = time.time()
+        o3 = match(o1, o2, kps1, kps2, f1, f2, ratio=0.75)
+        secs += time.time() - now
+    res["match_sift"] = secs / 10
+    secs = 0
+# -----------------------------------------
+    for _ in range(5):
+        now = time.time()
+        o1, kps1, f1 = detect_SURF(img1)
+        o2, kps2, f2 = detect_SURF(img2)
+        secs += time.time() - now
+    res["surf"] = secs / 10
+    secs = 0
+   
+    for _ in range(10):
+        now = time.time()
+        o3 = match(o1, o2, kps1, kps2, f1, f2, ratio=0.75)
+        secs += time.time() - now
+    res["match_surf"] = secs / 10
+    secs = 0
+
+    return res
 
 
 if __name__ == "__main__":
+    results = dict()
     img_stub = "lab11/test2_"
-    for i in range(1, 5):
-        for j in range(1, 5):
-            if i == j:
-                continue
-            test_single(img_stub + str(i) + ".jpg", img_stub +
-                        str(j) + ".jpg", filename="test_{}_{}.jpg".format(i, j))
+    with open("time_result.txt", "w+") as f:
+        for i in range(1, 5):
+            for j in range(1, 5):
+                if i == j:
+                    continue
+                res = test_time(img_stub + str(i) + ".jpg", img_stub +
+                                str(j) + ".jpg", filename="test_{}_{}.jpg".format(i, j))
+                
+                f.write("img{} and img{} orb:{}/match:{} sift:{}/match:{} surf:{}/match:{}\n".format(
+                    i, j, res["orb"], res["match_orb"], res["sift"], res["match_sift"], res["surf"], res["match_surf"]
+                ))
 
     cv2.destroyAllWindows()
     pass
