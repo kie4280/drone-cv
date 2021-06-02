@@ -69,8 +69,7 @@ def match(img1, img2, kps1, kps2, f1, f2, ratio=0.75):
 
 
 def test_single(img1, img2, filename="test.jpg"):
-    img1 = cv2.imread(img1)
-    img2 = cv2.imread(img2)
+
     o1, kps1, f1 = detect_ORB(img1)
     o2, kps2, f2 = detect_ORB(img2)
     o3 = match(o1, o2, kps1, kps2, f1, f2, ratio=0.75)
@@ -85,11 +84,10 @@ def test_single(img1, img2, filename="test.jpg"):
     cv2.imwrite("output/SURF_" + filename, o3)
 
 
-def test_time(img1, img2, filename="test.jpg"):
+def test_time(img1, img2):
     res = dict()
     secs = 0
-    img1 = cv2.imread(img1)
-    img2 = cv2.imread(img2)
+
     for _ in range(5):
         now = time.time()
         o1, kps1, f1 = detect_ORB(img1)
@@ -111,7 +109,7 @@ def test_time(img1, img2, filename="test.jpg"):
         secs += time.time() - now
     res["sift"] = secs / 10
     secs = 0
-    
+
     for _ in range(10):
         now = time.time()
         o3 = match(o1, o2, kps1, kps2, f1, f2, ratio=0.75)
@@ -126,7 +124,7 @@ def test_time(img1, img2, filename="test.jpg"):
         secs += time.time() - now
     res["surf"] = secs / 10
     secs = 0
-   
+
     for _ in range(10):
         now = time.time()
         o3 = match(o1, o2, kps1, kps2, f1, f2, ratio=0.75)
@@ -140,17 +138,42 @@ def test_time(img1, img2, filename="test.jpg"):
 if __name__ == "__main__":
     results = dict()
     img_stub = "lab11/test2_"
-    with open("time_result.txt", "w+") as f:
-        for i in range(1, 5):
-            for j in range(1, 5):
-                if i == j:
-                    continue
-                res = test_time(img_stub + str(i) + ".jpg", img_stub +
-                                str(j) + ".jpg", filename="test_{}_{}.jpg".format(i, j))
-                
-                f.write("img{} and img{} orb:{}/match:{} sift:{}/match:{} surf:{}/match:{}\n".format(
-                    i, j, res["orb"], res["match_orb"], res["sift"], res["match_sift"], res["surf"], res["match_surf"]
-                ))
+    with open("time_result_darken.txt", "w+") as f:
+
+        # normal test
+
+        # for i in range(1, 5):
+        #     for j in range(1, 5):
+        #         if i == j:
+        #             continue
+        #         img1 = cv2.imread(img_stub + str(i) + ".jpg")
+        #         img2 = cv2.imread(img_stub + str(j) + ".jpg")
+
+        #         res = test_time(
+        #             img1, img2, filename="test_{}_{}.jpg".format(i, j))
+
+        #         f.write("img{} and img{} orb:{}/match:{} sift:{}/match:{} surf:{}/match:{}\n".format(
+        #             i, j, res["orb"], res["match_orb"], res["sift"], res["match_sift"], res["surf"], res["match_surf"]
+        #         ))
+
+
+        # darken test
+
+        img1 = cv2.imread("lab11/test2_1.jpg")
+        img2 = cv2.imread("lab11/test2_1.jpg")
+        img2 = cv2.cvtColor(img2, cv2.COLOR_RGB2HSV)
+        darken = img2[:, :, 2] / 2
+        img2:np.ndarray = np.concatenate([np.expand_dims(img2[:, :, 0], axis=2), np.expand_dims(
+            img2[:, :, 1], axis=2), np.expand_dims(darken, axis=2)], axis=2)
+        img2 = img2.astype(np.uint8)
+        img2 = cv2.cvtColor(img2, cv2.COLOR_HSV2RGB)
+        # test_single(img1, img2, "darken_test.jpg")
+        res = test_time(
+                    img1, img2)
+
+        f.write("img{} and img{} orb:{}/match:{} sift:{}/match:{} surf:{}/match:{}\n".format(
+            1, 2, res["orb"], res["match_orb"], res["sift"], res["match_sift"], res["surf"], res["match_surf"]
+        ))
 
     cv2.destroyAllWindows()
     pass
