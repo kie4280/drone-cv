@@ -8,7 +8,7 @@ class Calibrate:
 
     def __init__(self):
         # Defining the dimensions of checkerboard
-        self.CHECKERBOARD = (6, 9)
+        self.CHECKERBOARD = (7,6)
         self.criteria = (cv2.TERM_CRITERIA_EPS +
                          cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
@@ -79,3 +79,20 @@ class Calibrate:
         ret, self.mtx, self.dist, rvecs, tvecs = cv2.calibrateCamera(
             self.objpoints, self.imgpoints, gray.shape[::-1], None, None)
         return self.mtx, self.dist
+
+if __name__ == "__main__":
+    cal = Calibrate()
+    cap = cv2.VideoCapture("/media/kie/VM/V_20210618_202714_OC0.mp4")
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if ret != True:
+            break
+        cv2.imshow("ssdf", frame)
+        key = cv2.waitKey(1)
+        if key == ord("c"):
+            cal.add_image(frame)
+        elif key == ord("q"):
+            cal.get_cali_results()
+            cal.write_calibrate_file()
+
+        
